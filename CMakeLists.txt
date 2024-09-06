@@ -1,25 +1,22 @@
-cmake_minimum_required(VERSION 3.8)
-project(shelly_wifi_relay_module_ros2)
+cmake_minimum_required(VERSION 2.8.3)
+project(shelly_wifi_relay_module_ros1)
 
-# Find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
-find_package(rclpy REQUIRED)
-find_package(std_srvs REQUIRED)
-
-# Install Python modules
-ament_python_install_package(${PROJECT_NAME})
-
-# Install Python executables
-install(PROGRAMS
-  scripts/shelly_relay_client.py
-  scripts/shelly_relay_server.py
-  DESTINATION lib/${PROJECT_NAME}
+find_package(catkin REQUIRED COMPONENTS
+  rospy
+  std_srvs
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
+catkin_package()
 
-ament_package()
+catkin_python_setup()
+
+catkin_install_python(PROGRAMS
+  scripts/shelly_relay_client.py
+  scripts/shelly_relay_server.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  # Add tests here if needed
+endif()

@@ -1,22 +1,22 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import rclpy
-from rclpy.node import Node
-from std_srvs.srv import SetBool
+import rospy
+from std_srvs.srv import SetBool, SetBoolResponse
 import requests
 
-class Shelly1PMRelayServer(Node):
+class Shelly1PMRelayServer:
 
     def __init__(self):
-        super().__init__('shelly_1pm_relay_server')
-        self.srv = self.create_service(SetBool, 'shelly_relay_control', self.relay_control_callback)
+        rospy.init_node('shelly_1pm_relay_server')
+        self.srv = rospy.Service('shelly_relay_control', SetBool, self.relay_control_callback)
         self.shelly_ip = '192.168.30.11'  # Replace with your Shelly 1PM's IP address
-        self.get_logger().info('Shelly 1PM Relay Server is ready')
+        rospy.loginfo('Shelly 1PM Relay Server is ready')
 
-    def relay_control_callback(self, request, response):
+    def relay_control_callback(self, request):
         state = 'on' if request.data else 'off'
         success = self.send_shelly_request(state)
         
+        response = SetBoolResponse()
         response.success = success
         response.message = f'Relay turned {state}' if success else f'Failed to turn relay {state}'
         return response
@@ -27,24 +27,15 @@ class Shelly1PMRelayServer(Node):
         try:
             response = requests.get(url, params=params, timeout=5)
             response.raise_for_status()
-            self.get_logger().info(f'Successfully sent request to Shelly: {response.text}')
+            rospy.loginfo(f'Successfully sent request to Shelly: {response.text}')
             return True
         except requests.RequestException as e:
-            self.get_logger().error(f'Failed to send request to Shelly: {e}')
+            rospy.logerr(f'Failed to send request to Shelly: {e}')
             return False
 
-def main(args=None):
-    rclpy.init(args=args)
-
-    shelly_server = Shelly1PMRelayServer()
-
-    try:
-        rclpy.spin(shelly_server)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        shelly_server.destroy_node()
-        rclpy.shutdown()
-
 if __name__ == '__main__':
-    main()
+    try:
+        server = Shelly1PMRelayServer()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
