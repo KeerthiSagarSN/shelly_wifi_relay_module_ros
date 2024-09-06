@@ -15,8 +15,9 @@ colcon build
 
 Launch the Wifi_relay service using the following command
 
-`ros2 run shelly_wifi_relay_module shelly_relay_server.py`
-
+```
+ros2 run shelly_wifi_relay_module shelly_relay_server.py
+```
 Launch the client for sending ON/OFF requests to the relay as follows
 
 For switchin ON
